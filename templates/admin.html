@@ -1,1 +1,957 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin – Amruthadhara Infra</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        body { background: #f1f5f9; font-family: 'Inter', system-ui, sans-serif; }
+        .form-section { background: #fff; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .form-section h3 { font-weight: 600; font-size: 1.1rem; margin-bottom: 1rem; color: #0a2558; border-bottom: 2px solid #00b4d8; padding-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .form-section h3 i { color: #00b4d8; }
+        label { font-weight: 500; font-size: 0.9rem; color: #334155; display: block; margin-bottom: 0.25rem; }
+        input, textarea, select { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.9rem; transition: border 0.2s, box-shadow 0.2s; background: #fafbfc; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #00b4d8; box-shadow: 0 0 0 3px rgba(0,180,216,0.15); background: #fff; }
+        .btn-save { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; font-weight: 600; padding: 0.75rem 2rem; border: none; border-radius: 40px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 14px rgba(0,180,216,0.4); }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,180,216,0.5); }
+        .btn-back { background: #e2e8f0; color: #1e293b; padding: 0.5rem 1.5rem; border-radius: 40px; text-decoration: none; font-weight: 500; transition: 0.2s; }
+        .btn-back:hover { background: #cbd5e1; }
+        .array-item { background: #f8fafc; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; border: 1px solid #e2e8f0; }
+        .array-item .remove-btn { background: #ef4444; color: #fff; border: none; border-radius: 6px; padding: 0.25rem 0.75rem; font-size: 0.75rem; cursor: pointer; transition: 0.2s; }
+        .array-item .remove-btn:hover { background: #dc2626; }
+        .add-btn { background: #00b4d8; color: #fff; border: none; border-radius: 6px; padding: 0.4rem 1rem; font-size: 0.85rem; cursor: pointer; transition: 0.2s; }
+        .add-btn:hover { background: #0077b6; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #0a2558; color: #fff; padding: 12px 24px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); border-left: 4px solid #00b4d8; transform: translateY(20px); opacity: 0; transition: all 0.4s ease; pointer-events: none; z-index: 9999; font-size: 0.9rem; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .image-preview { max-width: 100px; max-height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0; margin-top: 4px; }
+        .upload-btn { background: #0a2558; color: #fff; border: none; border-radius: 6px; padding: 0.3rem 0.8rem; font-size: 0.75rem; cursor: pointer; transition: 0.2s; }
+        .upload-btn:hover { background: #00b4d8; }
+        .file-input-wrap { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .file-input-wrap input[type="file"] { width: auto; padding: 0.3rem; background: transparent; border: none; }
+        .admin-header { background: #051025; padding: 1rem 0; border-bottom: 3px solid #00b4d8; }
+        .admin-header h1 { color: #fff; font-family: 'Montserrat', sans-serif; }
+        .admin-header .subtitle { color: #94a3b8; font-size: 0.9rem; }
+        .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+        @media (max-width: 768px) { .grid-cols-4 { grid-template-columns: 1fr; } }
+        .sub-section-title { font-weight: 600; color: #0a2558; margin: 0.5rem 0; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .sub-section-title i { color: #00b4d8; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="admin-header">
+        <div class="max-w-5xl mx-auto px-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-display"><i class="fa-solid fa-user-cog mr-2 text-brand-cyan"></i>Admin Panel</h1>
+                <p class="subtitle">Manage all content for Amruthadhara Infra</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="/" class="btn-back"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Site</a>
+                <button id="save-all" class="btn-save"><i class="fa-regular fa-floppy-disk mr-2"></i>Save All</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-5xl mx-auto p-4 mt-6">
+
+        <div id="loading" class="text-center py-12 text-slate-500">Loading data...</div>
+
+        <div id="admin-form" class="hidden">
+
+            <!-- ===== LOGO ===== -->
+            <div class="form-section">
+                <h3><i class="fa-regular fa-image"></i> Logo</h3>
+                <div class="file-input-wrap">
+                    <input type="file" id="logo-upload" accept="image/*" />
+                    <button class="upload-btn" onclick="uploadImage('logo-upload', 'logo_url', 'logo_preview', 'logo_url_display')">Upload</button>
+                    <span class="text-sm text-slate-500">File: <span id="logo_url_display"></span></span>
+                </div>
+                <input type="hidden" id="logo_url" />
+                <img id="logo_preview" class="image-preview mt-2" style="display:none;" />
+            </div>
+
+            <!-- ===== HERO SLIDES ===== -->
+            <div class="form-section" id="hero-section">
+                <h3><i class="fa-regular fa-sliders"></i> Hero Slides</h3>
+                <div id="hero-container"></div>
+                <button class="add-btn" onclick="addHero()"><i class="fa-solid fa-plus mr-1"></i>Add Slide</button>
+            </div>
+
+            <!-- ===== WHAT WE DO ===== -->
+            <div class="form-section" id="wwd-section">
+                <h3><i class="fa-regular fa-list"></i> What We Do</h3>
+                <div id="wwd-container"></div>
+                <button class="add-btn" onclick="addWWD()"><i class="fa-solid fa-plus mr-1"></i>Add Item</button>
+            </div>
+
+            <!-- ===== SPECIALIZED IN ===== -->
+            <div class="form-section" id="spec-section">
+                <h3><i class="fa-regular fa-star"></i> Specialized In</h3>
+                <div id="spec-container"></div>
+                <button class="add-btn" onclick="addSpec()"><i class="fa-solid fa-plus mr-1"></i>Add Item</button>
+            </div>
+
+            <!-- ===== TESTIMONIALS ===== -->
+            <div class="form-section" id="test-section">
+                <h3><i class="fa-regular fa-comment"></i> Testimonials</h3>
+                <div id="test-container"></div>
+                <button class="add-btn" onclick="addTest()"><i class="fa-solid fa-plus mr-1"></i>Add Testimonial</button>
+            </div>
+
+            <!-- ===== VISION ===== -->
+            <div class="form-section">
+                <h3><i class="fa-regular fa-eye"></i> Vision</h3>
+                <div class="mb-2"><label>Title</label><input type="text" id="vision_title" /></div>
+                <div><label>Text</label><textarea id="vision_text" rows="3"></textarea></div>
+            </div>
+
+            <!-- ===== CONTACT ===== -->
+            <div class="form-section">
+                <h3><i class="fa-regular fa-address-card"></i> Contact</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label>Phone</label><input type="text" id="contact_phone" /></div>
+                    <div><label>WhatsApp</label><input type="text" id="contact_whatsapp" /></div>
+                    <div><label>Email</label><input type="email" id="contact_email" /></div>
+                    <div><label>Address</label><input type="text" id="contact_address" /></div>
+                </div>
+            </div>
+
+            <!-- ===== SOCIAL ===== -->
+            <div class="form-section">
+                <h3><i class="fa-regular fa-share-from-square"></i> Social Links</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label>YouTube</label><input type="url" id="social_youtube" placeholder="https://..." /></div>
+                    <div><label>Twitter / X</label><input type="url" id="social_twitter" /></div>
+                    <div><label>Facebook</label><input type="url" id="social_facebook" /></div>
+                    <div><label>Instagram</label><input type="url" id="social_instagram" /></div>
+                    <div><label>LinkedIn</label><input type="url" id="social_linkedin" /></div>
+                </div>
+            </div>
+
+            <!-- ===== PRICING ===== -->
+            <div class="form-section" id="pricing-section">
+                <h3><i class="fa-regular fa-tags"></i> Pricing</h3>
+                <div id="pricing-container"></div>
+                <button class="add-btn" onclick="addPricing()"><i class="fa-solid fa-plus mr-1"></i>Add Pricing Tier</button>
+            </div>
+
+            <!-- ===== PARALLAX ===== -->
+            <div class="form-section">
+                <h3><i class="fa-regular fa-image"></i> Parallax Background</h3>
+                <div class="file-input-wrap">
+                    <input type="file" id="parallax-upload" accept="image/*" />
+                    <button class="upload-btn" onclick="uploadImage('parallax-upload', 'parallax_image', 'parallax_preview', 'parallax_image_display')">Upload</button>
+                    <span class="text-sm text-slate-500">File: <span id="parallax_image_display"></span></span>
+                </div>
+                <input type="hidden" id="parallax_image" />
+                <img id="parallax_preview" class="image-preview mt-2" style="display:none;" />
+            </div>
+
+            <!-- ===== ABOUT US ===== -->
+            <div class="form-section">
+                <h3><i class="fa-regular fa-circle-info"></i> About Us</h3>
+                <div class="mb-3">
+                    <label>What We Do Text</label>
+                    <textarea id="about_what" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Mission</label>
+                    <textarea id="about_mission" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Vision</label>
+                    <textarea id="about_vision" rows="3"></textarea>
+                </div>
+            </div>
+
+            <!-- ===== TEAM ===== -->
+            <div class="form-section" id="team-section">
+                <h3><i class="fa-regular fa-users"></i> Team</h3>
+                <div id="team-container"></div>
+                <button class="add-btn" onclick="addTeamMember()"><i class="fa-solid fa-plus mr-1"></i>Add Member</button>
+            </div>
+
+            <!-- ===== ACHIEVEMENTS ===== -->
+            <div class="form-section" id="achievement-section">
+                <h3><i class="fa-regular fa-trophy"></i> Achievements</h3>
+                <div id="achievement-container"></div>
+                <button class="add-btn" onclick="addAchievement()"><i class="fa-solid fa-plus mr-1"></i>Add Achievement</button>
+            </div>
+
+            <!-- ===== CAREERS ===== -->
+            <div class="form-section" id="careers-section">
+                <h3><i class="fa-regular fa-briefcase"></i> Careers</h3>
+                <div class="mb-3">
+                    <h4 class="sub-section-title"><i class="fa-regular fa-briefcase"></i> Job Openings</h4>
+                    <div id="jobs-container"></div>
+                    <button class="add-btn" onclick="addJob()"><i class="fa-solid fa-plus mr-1"></i>Add Job</button>
+                </div>
+                <div>
+                    <h4 class="sub-section-title"><i class="fa-regular fa-graduation-cap"></i> Internships</h4>
+                    <div id="internships-container"></div>
+                    <button class="add-btn" onclick="addInternship()"><i class="fa-solid fa-plus mr-1"></i>Add Internship</button>
+                </div>
+            </div>
+
+            <!-- ===== GALLERY ===== -->
+            <div class="form-section" id="gallery-section">
+                <h3><i class="fa-regular fa-images"></i> Gallery</h3>
+                <div id="gallery-container"></div>
+                <button class="add-btn" onclick="addGalleryImage()"><i class="fa-solid fa-plus mr-1"></i>Add Image URL</button>
+                <p class="text-xs text-slate-400 mt-2">Enter full image URLs (e.g., https://...). You can also use /static/images/yourfile.jpg for local uploads.</p>
+            </div>
+
+            <!-- ===== PROJECTS ===== -->
+            <div class="form-section" id="projects-section">
+                <h3><i class="fa-regular fa-folder-tree"></i> Projects</h3>
+                <div class="mb-3">
+                    <h4 class="sub-section-title"><i class="fa-regular fa-clock-rotate-left"></i> Past Projects</h4>
+                    <div id="past-projects-container"></div>
+                    <button class="add-btn" onclick="addProject('past')"><i class="fa-solid fa-plus mr-1"></i>Add Past Project</button>
+                </div>
+                <div class="mb-3">
+                    <h4 class="sub-section-title"><i class="fa-regular fa-clock"></i> Present Projects</h4>
+                    <div id="present-projects-container"></div>
+                    <button class="add-btn" onclick="addProject('present')"><i class="fa-solid fa-plus mr-1"></i>Add Present Project</button>
+                </div>
+                <div>
+                    <h4 class="sub-section-title"><i class="fa-regular fa-calendar-plus"></i> Upcoming Projects</h4>
+                    <div id="upcoming-projects-container"></div>
+                    <button class="add-btn" onclick="addProject('upcoming')"><i class="fa-solid fa-plus mr-1"></i>Add Upcoming Project</button>
+                </div>
+            </div>
+
+            <!-- SAVE BUTTON (bottom) -->
+            <div class="text-center mt-6">
+                <button id="save-all-bottom" class="btn-save"><i class="fa-regular fa-floppy-disk mr-2"></i>Save All Changes</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // ---------- Toast ----------
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.borderLeftColor = isError ? '#ef4444' : '#00b4d8';
+            toast.classList.add('show');
+            clearTimeout(toast._hide);
+            toast._hide = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ---------- Image upload (generic) ----------
+        async function uploadImage(inputId, targetField, previewId, displayId) {
+            const fileInput = document.getElementById(inputId);
+            const file = fileInput.files[0];
+            if (!file) {
+                showToast('Please select a file first.', true);
+                return;
+            }
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!res.ok) throw new Error('Upload failed');
+                const result = await res.json();
+                if (result.filename) {
+                    const targetEl = document.getElementById(targetField);
+                    if (targetEl) targetEl.value = result.filename;
+                    const displayEl = document.getElementById(displayId);
+                    if (displayEl) displayEl.textContent = result.filename;
+                    const previewEl = document.getElementById(previewId);
+                    if (previewEl) {
+                        previewEl.src = '/static/images/' + result.filename;
+                        previewEl.style.display = 'block';
+                    }
+                    showToast('Image uploaded successfully!');
+                } else {
+                    showToast('Error: ' + (result.error || 'Unknown'), true);
+                }
+            } catch (err) {
+                showToast('Upload error: ' + err.message, true);
+            }
+        }
+
+        // ---------- Render form from data ----------
+        function renderForm(data) {
+            // Logo
+            document.getElementById('logo_url').value = data.logo_url || '';
+            document.getElementById('logo_url_display').textContent = data.logo_url || '(none)';
+            if (data.logo_url) {
+                const preview = document.getElementById('logo_preview');
+                preview.src = '/static/images/' + data.logo_url;
+                preview.style.display = 'block';
+            }
+
+            // Hero
+            renderArray('hero', data.hero || [], (item, idx) => `
+                <div class="array-item" data-index="${idx}">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div>
+                            <label>Image</label>
+                            <div class="file-input-wrap">
+                                <input type="file" class="hero-image-upload" accept="image/*" />
+                                <button class="upload-btn" onclick="uploadHeroImage(this, ${idx})">Upload</button>
+                                <span class="text-sm text-slate-500">File: <span class="hero-image-name">${item.image || ''}</span></span>
+                            </div>
+                            <input type="hidden" class="hero-image" value="${item.image || ''}" />
+                            <img class="image-preview mt-1 hero-preview" src="${item.image ? '/static/images/' + item.image : ''}" style="${item.image ? 'display:block' : 'display:none'}" />
+                        </div>
+                        <div><label>Title</label><input type="text" class="hero-title" value="${item.title || ''}" /></div>
+                        <div><label>Subtitle</label><input type="text" class="hero-subtitle" value="${item.subtitle || ''}" /></div>
+                        <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'hero')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                    </div>
+                </div>
+            `, 'hero-container');
+
+            // What We Do
+            renderArray('wwd', data.what_we_do || [], (item) => `
+                <div class="array-item">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div><label>Icon (FontAwesome class)</label><input type="text" class="wwd-icon" value="${item.icon || ''}" /></div>
+                        <div><label>Title</label><input type="text" class="wwd-title" value="${item.title || ''}" /></div>
+                        <div><label>Description</label><input type="text" class="wwd-desc" value="${item.description || ''}" /></div>
+                        <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'wwd')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                    </div>
+                </div>
+            `, 'wwd-container');
+
+            // Specialized In
+            renderArray('spec', data.specialized_in || [], (item) => `
+                <div class="array-item">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div><label>Icon</label><input type="text" class="spec-icon" value="${item.icon || ''}" /></div>
+                        <div><label>Title</label><input type="text" class="spec-title" value="${item.title || ''}" /></div>
+                        <div><label>Description</label><input type="text" class="spec-desc" value="${item.description || ''}" /></div>
+                        <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'spec')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                    </div>
+                </div>
+            `, 'spec-container');
+
+            // Testimonials
+            renderArray('test', data.testimonials || [], (item) => `
+                <div class="array-item">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div><label>Name</label><input type="text" class="test-name" value="${item.name || ''}" /></div>
+                        <div><label>Feedback</label><input type="text" class="test-feedback" value="${item.feedback || ''}" /></div>
+                        <div><label>Project</label><input type="text" class="test-project" value="${item.project || ''}" /></div>
+                        <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'test')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                    </div>
+                </div>
+            `, 'test-container');
+
+            // Vision
+            document.getElementById('vision_title').value = data.vision?.title || '';
+            document.getElementById('vision_text').value = data.vision?.text || '';
+
+            // Contact
+            document.getElementById('contact_phone').value = data.contact?.phone || '';
+            document.getElementById('contact_whatsapp').value = data.contact?.whatsapp || '';
+            document.getElementById('contact_email').value = data.contact?.email || '';
+            document.getElementById('contact_address').value = data.contact?.address || '';
+
+            // Social
+            document.getElementById('social_youtube').value = data.social?.youtube || '';
+            document.getElementById('social_twitter').value = data.social?.twitter || '';
+            document.getElementById('social_facebook').value = data.social?.facebook || '';
+            document.getElementById('social_instagram').value = data.social?.instagram || '';
+            document.getElementById('social_linkedin').value = data.social?.linkedin || '';
+
+            // Pricing
+            renderArray('pricing', data.pricing || [], (item) => `
+                <div class="array-item">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div><label>Label</label><input type="text" class="pricing-label" value="${item.label || ''}" /></div>
+                        <div><label>Price</label><input type="text" class="pricing-price" value="${item.price || ''}" /></div>
+                        <div><label>Note</label><input type="text" class="pricing-note" value="${item.note || ''}" /></div>
+                        <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'pricing')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                    </div>
+                </div>
+            `, 'pricing-container');
+
+            // Parallax
+            document.getElementById('parallax_image').value = data.parallax_image || '';
+            document.getElementById('parallax_image_display').textContent = data.parallax_image || '(none)';
+            if (data.parallax_image) {
+                const preview = document.getElementById('parallax_preview');
+                preview.src = '/static/images/' + data.parallax_image;
+                preview.style.display = 'block';
+            }
+
+            // About
+            document.getElementById('about_what').value = data.about?.what_we_do_text || '';
+            document.getElementById('about_mission').value = data.about?.mission || '';
+            document.getElementById('about_vision').value = data.about?.vision || '';
+
+            // Team
+            renderArray('team', data.about?.team || [], (item) => `
+                <div class="array-item">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div><label>Name</label><input type="text" class="team-name" value="${item.name || ''}" /></div>
+                        <div><label>Role</label><input type="text" class="team-role" value="${item.role || ''}" /></div>
+                        <div><label>Image URL</label><input type="text" class="team-image" value="${item.image || ''}" placeholder="https://... or /static/images/..." /></div>
+                        <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'team')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                    </div>
+                </div>
+            `, 'team-container');
+
+            // Achievements
+            renderArray('achievement', data.about?.achievements || [], (item) => `
+                <div class="array-item">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div><label>Title</label><input type="text" class="ach-title" value="${item.title || ''}" /></div>
+                        <div><label>Image URL</label><input type="text" class="ach-image" value="${item.image || ''}" placeholder="https://... or /static/images/..." /></div>
+                        <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'achievement')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                    </div>
+                </div>
+            `, 'achievement-container');
+
+            // Careers - Jobs
+            renderArray('jobs', data.careers?.jobs || [], (item) => `
+                <div class="array-item">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div><label>Title</label><input type="text" class="job-title" value="${item.title || ''}" /></div>
+                        <div><label>Experience</label><input type="text" class="job-experience" value="${item.experience || ''}" /></div>
+                        <div><label>Type</label><input type="text" class="job-type" value="${item.type || ''}" /></div>
+                        <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'jobs')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                    </div>
+                </div>
+            `, 'jobs-container');
+
+            // Careers - Internships
+            renderArray('internships', data.careers?.internships || [], (item) => `
+                <div class="array-item">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div><label>Title</label><input type="text" class="intern-title" value="${item.title || ''}" /></div>
+                        <div><label>Location</label><input type="text" class="intern-location" value="${item.location || ''}" /></div>
+                        <div><label>Duration</label><input type="text" class="intern-duration" value="${item.duration || ''}" /></div>
+                        <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'internships')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                    </div>
+                </div>
+            `, 'internships-container');
+
+            // Gallery
+            renderArray('gallery', data.gallery || [], (item, idx) => `
+                <div class="array-item">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div><label>Image URL</label><input type="text" class="gallery-url" value="${item}" placeholder="https://... or /static/images/..." /></div>
+                        <div><button class="remove-btn" onclick="removeItem(this, 'gallery')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                    </div>
+                </div>
+            `, 'gallery-container');
+
+            // Projects - Past
+            renderArray('past-projects', data.projects?.past || [], (item) => `
+                <div class="array-item">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div><label>Title</label><input type="text" class="past-title" value="${item.title || ''}" /></div>
+                        <div><label>Description</label><input type="text" class="past-desc" value="${item.description || ''}" /></div>
+                        <div><label>Image URL</label><input type="text" class="past-image" value="${item.image || ''}" placeholder="https://... or /static/images/..." /></div>
+                        <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'past-projects')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                    </div>
+                </div>
+            `, 'past-projects-container');
+
+            // Projects - Present
+            renderArray('present-projects', data.projects?.present || [], (item) => `
+                <div class="array-item">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div><label>Title</label><input type="text" class="present-title" value="${item.title || ''}" /></div>
+                        <div><label>Description</label><input type="text" class="present-desc" value="${item.description || ''}" /></div>
+                        <div><label>Image URL</label><input type="text" class="present-image" value="${item.image || ''}" placeholder="https://... or /static/images/..." /></div>
+                        <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'present-projects')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                    </div>
+                </div>
+            `, 'present-projects-container');
+
+            // Projects - Upcoming
+            renderArray('upcoming-projects', data.projects?.upcoming || [], (item) => `
+                <div class="array-item">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div><label>Title</label><input type="text" class="upcoming-title" value="${item.title || ''}" /></div>
+                        <div><label>Description</label><input type="text" class="upcoming-desc" value="${item.description || ''}" /></div>
+                        <div><label>Image URL</label><input type="text" class="upcoming-image" value="${item.image || ''}" placeholder="https://... or /static/images/..." /></div>
+                        <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'upcoming-projects')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                    </div>
+                </div>
+            `, 'upcoming-projects-container');
+
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('admin-form').classList.remove('hidden');
+        }
+
+        // Helper to render arrays
+        function renderArray(type, items, templateFn, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            items.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.innerHTML = templateFn(item, index);
+                container.appendChild(div.firstElementChild);
+            });
+        }
+
+        // ---------- Add functions for each section ----------
+        function addHero() {
+            const container = document.getElementById('hero-container');
+            const idx = container.children.length;
+            const div = document.createElement('div');
+            div.className = 'array-item';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div>
+                        <label>Image</label>
+                        <div class="file-input-wrap">
+                            <input type="file" class="hero-image-upload" accept="image/*" />
+                            <button class="upload-btn" onclick="uploadHeroImage(this, ${idx})">Upload</button>
+                            <span class="text-sm text-slate-500">File: <span class="hero-image-name"></span></span>
+                        </div>
+                        <input type="hidden" class="hero-image" value="" />
+                        <img class="image-preview mt-1 hero-preview" style="display:none;" />
+                    </div>
+                    <div><label>Title</label><input type="text" class="hero-title" value="" /></div>
+                    <div><label>Subtitle</label><input type="text" class="hero-subtitle" value="" /></div>
+                    <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'hero')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addWWD() {
+            const container = document.getElementById('wwd-container');
+            const div = document.createElement('div');
+            div.className = 'array-item';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div><label>Icon (FontAwesome class)</label><input type="text" class="wwd-icon" value="fa-building" /></div>
+                    <div><label>Title</label><input type="text" class="wwd-title" value="" /></div>
+                    <div><label>Description</label><input type="text" class="wwd-desc" value="" /></div>
+                    <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'wwd')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addSpec() {
+            const container = document.getElementById('spec-container');
+            const div = document.createElement('div');
+            div.className = 'array-item';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div><label>Icon</label><input type="text" class="spec-icon" value="fa-droplet" /></div>
+                    <div><label>Title</label><input type="text" class="spec-title" value="" /></div>
+                    <div><label>Description</label><input type="text" class="spec-desc" value="" /></div>
+                    <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'spec')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addTest() {
+            const container = document.getElementById('test-container');
+            const div = document.createElement('div');
+            div.className = 'array-item';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div><label>Name</label><input type="text" class="test-name" value="" /></div>
+                    <div><label>Feedback</label><input type="text" class="test-feedback" value="" /></div>
+                    <div><label>Project</label><input type="text" class="test-project" value="" /></div>
+                    <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'test')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addPricing() {
+            const container = document.getElementById('pricing-container');
+            const div = document.createElement('div');
+            div.className = 'array-item';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div><label>Label</label><input type="text" class="pricing-label" value="" /></div>
+                    <div><label>Price</label><input type="text" class="pricing-price" value="" /></div>
+                    <div><label>Note</label><input type="text" class="pricing-note" value="" /></div>
+                    <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'pricing')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        // Team
+        function addTeamMember() {
+            const container = document.getElementById('team-container');
+            const div = document.createElement('div');
+            div.className = 'array-item';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div><label>Name</label><input type="text" class="team-name" value="" /></div>
+                    <div><label>Role</label><input type="text" class="team-role" value="" /></div>
+                    <div><label>Image URL</label><input type="text" class="team-image" value="" placeholder="https://... or /static/images/..." /></div>
+                    <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'team')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        // Achievements
+        function addAchievement() {
+            const container = document.getElementById('achievement-container');
+            const div = document.createElement('div');
+            div.className = 'array-item';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div><label>Title</label><input type="text" class="ach-title" value="" /></div>
+                    <div><label>Image URL</label><input type="text" class="ach-image" value="" placeholder="https://... or /static/images/..." /></div>
+                    <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'achievement')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        // Jobs
+        function addJob() {
+            const container = document.getElementById('jobs-container');
+            const div = document.createElement('div');
+            div.className = 'array-item';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div><label>Title</label><input type="text" class="job-title" value="" /></div>
+                    <div><label>Experience</label><input type="text" class="job-experience" value="" /></div>
+                    <div><label>Type</label><input type="text" class="job-type" value="Full Time" /></div>
+                    <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'jobs')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        // Internships
+        function addInternship() {
+            const container = document.getElementById('internships-container');
+            const div = document.createElement('div');
+            div.className = 'array-item';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div><label>Title</label><input type="text" class="intern-title" value="" /></div>
+                    <div><label>Location</label><input type="text" class="intern-location" value="" /></div>
+                    <div><label>Duration</label><input type="text" class="intern-duration" value="" /></div>
+                    <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'internships')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        // Gallery
+        function addGalleryImage() {
+            const container = document.getElementById('gallery-container');
+            const div = document.createElement('div');
+            div.className = 'array-item';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div><label>Image URL</label><input type="text" class="gallery-url" value="" placeholder="https://... or /static/images/..." /></div>
+                    <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, 'gallery')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        // Projects - generic
+        function addProject(category) {
+            const containerMap = {
+                'past': 'past-projects-container',
+                'present': 'present-projects-container',
+                'upcoming': 'upcoming-projects-container'
+            };
+            const container = document.getElementById(containerMap[category]);
+            const div = document.createElement('div');
+            div.className = 'array-item';
+            const clsMap = { 'past': 'past', 'present': 'present', 'upcoming': 'upcoming' };
+            const cls = clsMap[category];
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div><label>Title</label><input type="text" class="${cls}-title" value="" /></div>
+                    <div><label>Description</label><input type="text" class="${cls}-desc" value="" /></div>
+                    <div><label>Image URL</label><input type="text" class="${cls}-image" value="" placeholder="https://... or /static/images/..." /></div>
+                    <div class="flex items-end"><button class="remove-btn" onclick="removeItem(this, '${category}-projects')"><i class="fa-regular fa-trash-can mr-1"></i>Remove</button></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        // Remove item
+        function removeItem(btn, type) {
+            const item = btn.closest('.array-item');
+            if (item) item.remove();
+        }
+
+        // ---------- Hero image upload (specific) ----------
+        async function uploadHeroImage(btn, index) {
+            const item = btn.closest('.array-item');
+            const fileInput = item.querySelector('.hero-image-upload');
+            const file = fileInput.files[0];
+            if (!file) {
+                showToast('Select a file first.', true);
+                return;
+            }
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                if (!res.ok) throw new Error('Upload failed');
+                const result = await res.json();
+                if (result.filename) {
+                    const hidden = item.querySelector('.hero-image');
+                    hidden.value = result.filename;
+                    const nameSpan = item.querySelector('.hero-image-name');
+                    if (nameSpan) nameSpan.textContent = result.filename;
+                    const preview = item.querySelector('.hero-preview');
+                    preview.src = '/static/images/' + result.filename;
+                    preview.style.display = 'block';
+                    showToast('Image uploaded for slide ' + (index+1));
+                } else {
+                    showToast('Error: ' + (result.error || 'Unknown'), true);
+                }
+            } catch (err) {
+                showToast('Upload error: ' + err.message, true);
+            }
+        }
+
+        // ---------- Collect form data ----------
+        function collectFormData() {
+            const data = {};
+
+            // Logo
+            data.logo_url = document.getElementById('logo_url').value;
+
+            // Hero
+            data.hero = [];
+            document.querySelectorAll('#hero-container .array-item').forEach(el => {
+                const image = el.querySelector('.hero-image').value;
+                const title = el.querySelector('.hero-title').value;
+                const subtitle = el.querySelector('.hero-subtitle').value;
+                if (image || title || subtitle) {
+                    data.hero.push({ image, title, subtitle });
+                }
+            });
+
+            // What We Do
+            data.what_we_do = [];
+            document.querySelectorAll('#wwd-container .array-item').forEach(el => {
+                const icon = el.querySelector('.wwd-icon').value;
+                const title = el.querySelector('.wwd-title').value;
+                const description = el.querySelector('.wwd-desc').value;
+                if (icon || title || description) {
+                    data.what_we_do.push({ icon, title, description });
+                }
+            });
+
+            // Specialized In
+            data.specialized_in = [];
+            document.querySelectorAll('#spec-container .array-item').forEach(el => {
+                const icon = el.querySelector('.spec-icon').value;
+                const title = el.querySelector('.spec-title').value;
+                const description = el.querySelector('.spec-desc').value;
+                if (icon || title || description) {
+                    data.specialized_in.push({ icon, title, description });
+                }
+            });
+
+            // Testimonials
+            data.testimonials = [];
+            document.querySelectorAll('#test-container .array-item').forEach(el => {
+                const name = el.querySelector('.test-name').value;
+                const feedback = el.querySelector('.test-feedback').value;
+                const project = el.querySelector('.test-project').value;
+                if (name || feedback || project) {
+                    data.testimonials.push({ name, feedback, project });
+                }
+            });
+
+            // Vision
+            data.vision = {
+                title: document.getElementById('vision_title').value,
+                text: document.getElementById('vision_text').value
+            };
+
+            // Contact
+            data.contact = {
+                phone: document.getElementById('contact_phone').value,
+                whatsapp: document.getElementById('contact_whatsapp').value,
+                email: document.getElementById('contact_email').value,
+                address: document.getElementById('contact_address').value
+            };
+
+            // Social
+            data.social = {
+                youtube: document.getElementById('social_youtube').value,
+                twitter: document.getElementById('social_twitter').value,
+                facebook: document.getElementById('social_facebook').value,
+                instagram: document.getElementById('social_instagram').value,
+                linkedin: document.getElementById('social_linkedin').value
+            };
+
+            // Pricing
+            data.pricing = [];
+            document.querySelectorAll('#pricing-container .array-item').forEach(el => {
+                const label = el.querySelector('.pricing-label').value;
+                const price = el.querySelector('.pricing-price').value;
+                const note = el.querySelector('.pricing-note').value;
+                if (label || price || note) {
+                    data.pricing.push({ label, price, note });
+                }
+            });
+
+            // Parallax
+            data.parallax_image = document.getElementById('parallax_image').value;
+
+            // About
+            data.about = {
+                what_we_do_text: document.getElementById('about_what').value,
+                mission: document.getElementById('about_mission').value,
+                vision: document.getElementById('about_vision').value,
+                team: [],
+                achievements: []
+            };
+
+            // Team
+            document.querySelectorAll('#team-container .array-item').forEach(el => {
+                const name = el.querySelector('.team-name').value;
+                const role = el.querySelector('.team-role').value;
+                const image = el.querySelector('.team-image').value;
+                if (name || role || image) {
+                    data.about.team.push({ name, role, image });
+                }
+            });
+
+            // Achievements
+            document.querySelectorAll('#achievement-container .array-item').forEach(el => {
+                const title = el.querySelector('.ach-title').value;
+                const image = el.querySelector('.ach-image').value;
+                if (title || image) {
+                    data.about.achievements.push({ title, image });
+                }
+            });
+
+            // Careers
+            data.careers = {
+                jobs: [],
+                internships: []
+            };
+
+            document.querySelectorAll('#jobs-container .array-item').forEach(el => {
+                const title = el.querySelector('.job-title').value;
+                const experience = el.querySelector('.job-experience').value;
+                const type = el.querySelector('.job-type').value;
+                if (title || experience || type) {
+                    data.careers.jobs.push({ title, experience, type });
+                }
+            });
+
+            document.querySelectorAll('#internships-container .array-item').forEach(el => {
+                const title = el.querySelector('.intern-title').value;
+                const location = el.querySelector('.intern-location').value;
+                const duration = el.querySelector('.intern-duration').value;
+                if (title || location || duration) {
+                    data.careers.internships.push({ title, location, duration });
+                }
+            });
+
+            // Gallery
+            data.gallery = [];
+            document.querySelectorAll('#gallery-container .array-item').forEach(el => {
+                const url = el.querySelector('.gallery-url').value.trim();
+                if (url) {
+                    data.gallery.push(url);
+                }
+            });
+
+            // Projects
+            data.projects = {
+                past: [],
+                present: [],
+                upcoming: []
+            };
+
+            document.querySelectorAll('#past-projects-container .array-item').forEach(el => {
+                const title = el.querySelector('.past-title').value;
+                const description = el.querySelector('.past-desc').value;
+                const image = el.querySelector('.past-image').value;
+                if (title || description || image) {
+                    data.projects.past.push({ title, description, image });
+                }
+            });
+
+            document.querySelectorAll('#present-projects-container .array-item').forEach(el => {
+                const title = el.querySelector('.present-title').value;
+                const description = el.querySelector('.present-desc').value;
+                const image = el.querySelector('.present-image').value;
+                if (title || description || image) {
+                    data.projects.present.push({ title, description, image });
+                }
+            });
+
+            document.querySelectorAll('#upcoming-projects-container .array-item').forEach(el => {
+                const title = el.querySelector('.upcoming-title').value;
+                const description = el.querySelector('.upcoming-desc').value;
+                const image = el.querySelector('.upcoming-image').value;
+                if (title || description || image) {
+                    data.projects.upcoming.push({ title, description, image });
+                }
+            });
+
+            return data;
+        }
+
+        // ---------- Save data ----------
+        async function saveData(data) {
+            try {
+                const res = await fetch('/api/data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!res.ok) throw new Error('Save failed');
+                const result = await res.json();
+                showToast('✅ ' + result.message);
+                return true;
+            } catch (err) {
+                showToast('❌ Error saving data: ' + err.message, true);
+                return false;
+            }
+        }
+
+        // ---------- Load data & init ----------
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const res = await fetch('/api/data');
+                if (!res.ok) throw new Error('Failed to fetch');
+                const data = await res.json();
+                renderForm(data);
+            } catch (err) {
+                alert('Could not load data. Ensure Flask is running.');
+            }
+
+            // Save buttons
+            const saveAll = document.getElementById('save-all');
+            const saveAllBottom = document.getElementById('save-all-bottom');
+            const saveHandler = async function() {
+                const updated = collectFormData();
+                await saveData(updated);
+            };
+            saveAll.addEventListener('click', saveHandler);
+            saveAllBottom.addEventListener('click', saveHandler);
+        });
+    </script>
+</body>
+</html>
